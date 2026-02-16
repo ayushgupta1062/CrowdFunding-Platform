@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages - Crowdfunding Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      overflow: hidden;
+    }
+    .chat-container {
+      display: flex;
+      height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 80px;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+    .sidebar-brand {
+      font-size: 32px;
+      margin-bottom: 40px;
+    }
+    .sidebar-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+    .sidebar-menu a {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+    .sidebar-menu a i {
+      font-size: 24px;
+    }
+    /* Conversations List */
+    .conversations-panel {
+      width: 350px;
+      background: white;
+      border-right: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+    }
+    .conversations-header {
+      padding: 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .conversations-header h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
+    .search-box {
+      padding: 15px 20px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 2px solid #e5e7eb;
+      border-radius: 25px;
+      font-size: 14px;
+    }
+    .search-icon {
+      position: absolute;
+      left: 35px;
+      top: 27px;
+      color: #9ca3af;
+    }
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .conversation-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f3f4f6;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      gap: 12px;
+      align-items: start;
+    }
+    .conversation-item:hover {
+      background: #f9fafb;
+    }
+    .conversation-item.active {
+      background: #eff6ff;
+      border-left: 4px solid #10b981;
+    }
+    .conversation-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .conversation-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .conversation-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .conversation-name {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .conversation-time {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .conversation-preview {
+      font-size: 14px;
+      color: #6b7280;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .unread-badge {
+      background: #10b981;
+      color: white;
+      border-radius: 12px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    /* Chat Area */
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #f9fafb;
+    }
+    .chat-header {
+      background: white;
+      padding: 20px 30px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .chat-header-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+    }
+    .chat-header-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .chat-header-info h4 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+    }
+    .chat-header-info p {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0;
+    }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .message {
+      display: flex;
+      gap: 10px;
+      max-width: 70%;
+      animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .message.sent {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+    .message-avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .message.sent .message-avatar {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+    .message-content {
+      background: white;
+      padding: 12px 16px;
+      border-radius: 18px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .message.sent .message-content {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+    .message-text {
+      margin: 0;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    .message-time {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    .message.sent .message-time {
+      color: rgba(255,255,255,0.8);
+    }
+    .typing-indicator {
+      display: none;
+      padding: 10px 15px;
+      background: white;
+      border-radius: 18px;
+      width: fit-content;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .typing-indicator.show {
+      display: block;
+    }
+    .typing-dots {
+      display: flex;
+      gap: 4px;
+    }
+    .typing-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #9ca3af;
+      animation: typing 1.4s infinite;
+    }
+    .typing-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+    .chat-input-area {
+      background: white;
+      padding: 20px 30px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .chat-input-container {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .chat-input {
+      flex: 1;
+      padding: 12px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 25px;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+    .chat-input:focus {
+      outline: none;
+      border-color: #10b981;
+    }
+    .send-btn {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .send-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+    }
+    .empty-state i {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    @media (max-width: 768px) {
+      .conversations-panel {
+        width: 100%;
+        display: none;
+      }
+      .conversations-panel.show {
+        display: flex;
+      }
+      .chat-area {
+        display: none;
+      }
+      .chat-area.show {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <i class="fas fa-hand-holding-heart"></i>
+      </div>
+      <nav class="sidebar-menu">
+        <a href="/investor/dashboard"><i class="fas fa-th-large"></i></a>
+        <a href="/investor/explore"><i class="fas fa-compass"></i></a>
+        <a href="/investor/saved"><i class="fas fa-bookmark"></i></a>
+        <a href="/investor/messages" class="active"><i class="fas fa-comments"></i></a>
+        <a href="/investor/profile"><i class="fas fa-user"></i></a>
+        <a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i></a>
+      </nav>
+    </aside>
+
+    <!-- Conversations List -->
+    <div class="conversations-panel">
+      <div class="conversations-header">
+        <h3>Messages</h3>
+      </div>
+      <div class="search-box" style="position: relative;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="searchConversations" placeholder="Search conversations...">
+      </div>
+      <div class="conversations-list" id="conversationsList">
+        <div class="empty-state" style="padding: 40px 20px;">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading conversations...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chatArea">
+      <div class="empty-state">
+        <i class="fas fa-comments"></i>
+        <h4>Select a conversation</h4>
+        <p>Choose a conversation from the list to start messaging</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    function parseJwt(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1]));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    const userInfo = parseJwt(token);
+    let socket;
+    let currentConversation = null;
+    let conversations = [];
+    let typingTimeout;
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    });
+
+    // Initialize Socket.io
+    function initSocket() {
+      socket = io('http://localhost:5000');
+
+      socket.on('connect', () => {
+        console.log('Connected to socket server');
+      });
+
+      socket.on('new-message', (message) => {
+        if (currentConversation && message.conversationId === currentConversation._id) {
+          appendMessage(message);
+          scrollToBottom();
+        }
+        updateConversationPreview(message);
+      });
+
+      socket.on('user-typing', (data) => {
+        if (currentConversation && data.conversationId === currentConversation._id) {
+          document.getElementById('typingIndicator').classList.add('show');
+        }
+      });
+
+      socket.on('user-stop-typing', (data) => {
+        if (currentConversation && data.conversationId === currentConversation._id) {
+          document.getElementById('typingIndicator').classList.remove('show');
+        }
+      });
+    }
+
+    // Load conversations
+    async function loadConversations() {
+      if (!userInfo || !userInfo.userId) return;
+
+      try {
+        const response = await fetch(`/api/chat/conversations/${userInfo.userId}/investor`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (data.success && data.conversations.length > 0) {
+          conversations = data.conversations;
+          renderConversations(conversations);
+        } else {
+          document.getElementById('conversationsList').innerHTML = `
+            <div class="empty-state" style="padding: 40px 20px;">
+              <i class="fas fa-inbox"></i>
+              <p>No conversations yet</p>
+              <small>Start messaging startup owners from campaign pages</small>
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('Error loading conversations:', error);
+      }
+    }
+
+    function renderConversations(convs) {
+      const container = document.getElementById('conversationsList');
+      container.innerHTML = convs.map(conv => {
+        const owner = conv.owner;
+        const initials = owner.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
+        const time = formatTime(conv.lastMessageTime);
+        
+        return `
+          <div class="conversation-item" onclick="openConversation('${conv._id}')">
+            <div class="conversation-avatar">
+              ${owner.profilePhoto ? `<img src="${owner.profilePhoto}" alt="${owner.fullName}">` : initials}
+            </div>
+            <div class="conversation-info">
+              <div class="conversation-name">
+                <span>${owner.fullName}</span>
+                <span class="conversation-time">${time}</span>
+              </div>
+              <div class="conversation-preview">${conv.lastMessage || 'Start a conversation'}</div>
+              <small style="color: #9ca3af; font-size: 12px;">${conv.campaign.projectName}</small>
+            </div>
+            ${conv.unreadCountInvestor > 0 ? `<span class="unread-badge">${conv.unreadCountInvestor}</span>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function openConversation(conversationId) {
+      const conv = conversations.find(c => c._id === conversationId);
+      if (!conv) return;
+
+      currentConversation = conv;
+
+      // Mark as active
+      document.querySelectorAll('.conversation-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+
+      // Join socket room
+      if (socket) {
+        socket.emit('join-conversation', conversationId);
+      }
+
+      // Load messages
+      await loadMessages(conversationId);
+
+      // Mark as read
+      await markAsRead(conversationId);
+
+      // Show chat area
+      const chatArea = document.getElementById('chatArea');
+      const owner = conv.owner;
+      const initials = owner.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
+
+      chatArea.innerHTML = `
+        <div class="chat-header">
+          <div class="chat-header-avatar">
+            ${owner.profilePhoto ? `<img src="${owner.profilePhoto}" alt="${owner.fullName}">` : initials}
+          </div>
+          <div class="chat-header-info">
+            <h4>${owner.fullName}</h4>
+            <p>${conv.campaign.projectName}</p>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="typing-indicator" id="typingIndicator">
+          <div class="typing-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <div class="chat-input-container">
+            <input type="text" class="chat-input" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Add typing indicator
+      document.getElementById('messageInput').addEventListener('input', handleTyping);
+    }
+
+    async function loadMessages(conversationId) {
+      try {
+        const response = await fetch(`/api/chat/messages/${conversationId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          const messagesContainer = document.getElementById('chatMessages');
+          messagesContainer.innerHTML = '';
+          data.messages.forEach(msg => appendMessage(msg));
+          scrollToBottom();
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    }
+
+    function appendMessage(message) {
+      const messagesContainer = document.getElementById('chatMessages');
+      const isSent = message.senderType === 'investor';
+      const time = formatTime(message.createdAt);
+
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${isSent ? 'sent' : 'received'}`;
+      messageEl.innerHTML = `
+        <div class="message-avatar">${isSent ? 'You' : currentConversation.owner.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
+        <div class="message-content">
+          <p class="message-text">${message.message}</p>
+          <div class="message-time">${time}</div>
+        </div>
+      `;
+      messagesContainer.appendChild(messageEl);
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+
+      if (!message || !currentConversation) return;
+
+      socket.emit('send-message', {
+        conversationId: currentConversation._id,
+        senderId: userInfo.userId,
+        senderType: 'investor',
+        message
+      });
+
+      input.value = '';
+      socket.emit('stop-typing', { conversationId: currentConversation._id });
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    function handleTyping() {
+      if (!currentConversation) return;
+
+      socket.emit('typing', { conversationId: currentConversation._id });
+
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        socket.emit('stop-typing', { conversationId: currentConversation._id });
+      }, 1000);
+    }
+
+    async function markAsRead(conversationId) {
+      try {
+        await fetch('/api/chat/mark-read', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            conversationId,
+            userType: 'investor'
+          })
+        });
+      } catch (error) {
+        console.error('Error marking as read:', error);
+      }
+    }
+
+    function updateConversationPreview(message) {
+      const conv = conversations.find(c => c._id === message.conversationId);
+      if (conv) {
+        conv.lastMessage = message.message;
+        conv.lastMessageTime = message.createdAt;
+        if (message.senderType !== 'investor') {
+          conv.unreadCountInvestor += 1;
+        }
+        renderConversations(conversations);
+      }
+    }
+
+    function scrollToBottom() {
+      const messagesContainer = document.getElementById('chatMessages');
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }
+
+    function formatTime(date) {
+      const d = new Date(date);
+      const now = new Date();
+      const diff = now - d;
+      
+      if (diff < 60000) return 'Just now';
+      if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+      if (diff < 86400000) return Math.floor(diff / 3600000) + 'h ago';
+      return d.toLocaleDateString();
+    }
+
+    // Search conversations
+    document.getElementById('searchConversations').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = conversations.filter(conv => 
+        conv.owner.fullName.toLowerCase().includes(query) ||
+        conv.campaign.projectName.toLowerCase().includes(query)
+      );
+      renderConversations(filtered);
+    });
+
+    // Initialize
+    initSocket();
+    loadConversations();
+  </script>
+</body>
+</html>

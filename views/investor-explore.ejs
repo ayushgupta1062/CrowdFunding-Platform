@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Campaigns - Crowdfunding Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+    }
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 30px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 0 25px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+    .sidebar-brand h4 {
+      font-weight: 700;
+      margin: 0;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar-menu li {
+      margin: 5px 0;
+    }
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 15px 25px;
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+    .sidebar-menu i {
+      width: 25px;
+      margin-right: 12px;
+      font-size: 18px;
+    }
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 30px;
+    }
+    .page-header {
+      margin-bottom: 30px;
+    }
+    .page-header h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+    .search-section {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+    .search-bar {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 15px 50px 15px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    .search-bar input:focus {
+      outline: none;
+      border-color: #10b981;
+    }
+    .search-bar button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .search-bar button:hover {
+      background: #059669;
+    }
+    .filters-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    .filter-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .filter-group select {
+      width: 100%;
+      padding: 10px 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .filter-group select:focus {
+      outline: none;
+      border-color: #10b981;
+    }
+    .campaigns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+    }
+    .campaign-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      border: 1px solid #e5e7eb;
+    }
+    .campaign-card:hover {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      transform: translateY(-3px);
+    }
+    .campaign-image {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 56px;
+      position: relative;
+    }
+    .save-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(255,255,255,0.95);
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #6b7280;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .save-btn:hover {
+      background: white;
+      transform: scale(1.1);
+    }
+    .save-btn.saved {
+      color: #ef4444;
+    }
+    .campaign-body {
+      padding: 20px;
+    }
+    .campaign-header {
+      margin-bottom: 12px;
+    }
+    .campaign-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 5px;
+      line-height: 1.3;
+    }
+    .campaign-owner {
+      font-size: 14px;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .campaign-category {
+      display: inline-block;
+      padding: 6px 14px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .campaign-description {
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .funding-stats {
+      margin-bottom: 15px;
+    }
+    .funding-amount {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .funding-amount .raised {
+      font-weight: 700;
+      color: #10b981;
+    }
+    .funding-amount .goal {
+      color: #6b7280;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 10px;
+      background: #e5e7eb;
+    }
+    .progress-bar {
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      border-radius: 10px;
+    }
+    .campaign-footer {
+      display: flex;
+      gap: 10px;
+      padding-top: 15px;
+      border-top: 1px solid #e5e7eb;
+    }
+    .btn-view {
+      flex: 1;
+      padding: 12px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-view:hover {
+      background: #059669;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: #9ca3af;
+    }
+    .empty-state i {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    .results-info {
+      margin-bottom: 20px;
+      color: #6b7280;
+      font-size: 15px;
+    }
+    .results-info strong {
+      color: #1f2937;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
+      .sidebar-brand h4, .sidebar-menu span {
+        display: none;
+      }
+      .main-content {
+        margin-left: 70px;
+      }
+      .campaigns-grid {
+        grid-template-columns: 1fr;
+      }
+      .filters-row {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <h4><i class="fas fa-hand-holding-heart me-2"></i><span>CrowdFund</span></h4>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/investor/dashboard"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li><a href="/investor/explore" class="active"><i class="fas fa-compass"></i><span>Explore Campaigns</span></a></li>
+        <li><a href="/investor/saved"><i class="fas fa-bookmark"></i><span>Saved Projects</span></a></li>
+        <li><a href="/investor/messages"><i class="fas fa-comments"></i><span>Messages</span></a></li>
+        <li><a href="/investor/profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
+        <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h2><i class="fas fa-compass me-2"></i>Explore Campaigns</h2>
+        <p style="color: #6b7280;">Discover innovative startups and projects to invest in</p>
+      </div>
+
+      <!-- Search and Filters -->
+      <div class="search-section">
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search by project name, owner, or startup...">
+          <button onclick="searchCampaigns()">
+            <i class="fas fa-search me-2"></i>Search
+          </button>
+        </div>
+
+        <div class="filters-row">
+          <div class="filter-group">
+            <label>Category</label>
+            <select id="categoryFilter" onchange="applyFilters()">
+              <option value="all">All Categories</option>
+              <option value="Technology">Technology</option>
+              <option value="Education">Education</option>
+              <option value="Finance">Finance</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="E-commerce">E-commerce</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Funding Range</label>
+            <select id="fundingFilter" onchange="applyFilters()">
+              <option value="">All Ranges</option>
+              <option value="0-10000">$0 - $10,000</option>
+              <option value="10000-50000">$10,000 - $50,000</option>
+              <option value="50000-100000">$50,000 - $100,000</option>
+              <option value="100000-500000">$100,000 - $500,000</option>
+              <option value="500000-999999999">$500,000+</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label>Project Stage</label>
+            <select id="stageFilter" onchange="applyFilters()">
+              <option value="">All Stages</option>
+              <option value="idea">Idea</option>
+              <option value="prototype">Prototype</option>
+              <option value="mvp">MVP</option>
+              <option value="launched">Launched</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Info -->
+      <div class="results-info" id="resultsInfo">
+        Loading campaigns...
+      </div>
+
+      <!-- Campaigns Grid -->
+      <div class="campaigns-grid" id="campaignsContainer">
+        <div class="empty-state">
+          <i class="fas fa-spinner fa-spin"></i>
+          <p>Loading campaigns...</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    function parseJwt(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1]));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    const userInfo = parseJwt(token);
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    });
+
+    function getCategoryIcon(category) {
+      const icons = {
+        'Technology': 'fa-laptop-code',
+        'Education': 'fa-graduation-cap',
+        'Finance': 'fa-chart-line',
+        'Healthcare': 'fa-heartbeat',
+        'E-commerce': 'fa-shopping-cart',
+        'Other': 'fa-lightbulb'
+      };
+      return icons[category] || 'fa-lightbulb';
+    }
+
+    async function loadCampaigns(params = {}) {
+      const container = document.getElementById('campaignsContainer');
+      const resultsInfo = document.getElementById('resultsInfo');
+      
+      container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading campaigns...</p></div>';
+
+      try {
+        const queryParams = new URLSearchParams(params);
+        const response = await fetch(`/api/campaigns?${queryParams}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (data.success && data.campaigns.length > 0) {
+          resultsInfo.innerHTML = `Found <strong>${data.campaigns.length}</strong> campaign${data.campaigns.length !== 1 ? 's' : ''}`;
+
+          container.innerHTML = data.campaigns.map(campaign => {
+            const progress = (campaign.currentFunding / campaign.fundingGoal) * 100;
+            const icon = getCategoryIcon(campaign.category);
+            return `
+              <div class="campaign-card">
+                <div class="campaign-image">
+                  <i class="fas ${icon}"></i>
+                  <button class="save-btn" onclick="toggleSave('${campaign._id}', this)" data-campaign-id="${campaign._id}">
+                    <i class="far fa-bookmark"></i>
+                  </button>
+                </div>
+                <div class="campaign-body">
+                  <div class="campaign-header">
+                    <div class="campaign-title">${campaign.projectName}</div>
+                    <div class="campaign-owner">
+                      <i class="fas fa-user-circle"></i>
+                      ${campaign.ownerName}
+                    </div>
+                  </div>
+                  <span class="campaign-category">${campaign.category}</span>
+                  <p class="campaign-description">${campaign.description}</p>
+                  <div class="funding-stats">
+                    <div class="funding-amount">
+                      <span class="raised">$${campaign.currentFunding.toLocaleString()}</span>
+                      <span class="goal">of $${campaign.fundingGoal.toLocaleString()}</span>
+                    </div>
+                    <div class="progress">
+                      <div class="progress-bar" style="width: ${Math.min(progress, 100)}%"></div>
+                    </div>
+                  </div>
+                  <div class="campaign-footer">
+                    <button class="btn-view" onclick="viewCampaign('${campaign._id}')">
+                      <i class="fas fa-eye me-2"></i>View Details
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          loadSavedStatus();
+        } else {
+          resultsInfo.innerHTML = 'No campaigns found';
+          container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><h5>No campaigns found</h5><p>Try adjusting your search or filters</p></div>';
+        }
+      } catch (error) {
+        console.error('Error loading campaigns:', error);
+        resultsInfo.innerHTML = 'Error loading campaigns';
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load campaigns</p></div>';
+      }
+    }
+
+    async function loadSavedStatus() {
+      if (!userInfo || !userInfo.userId) return;
+      
+      const saveButtons = document.querySelectorAll('.save-btn');
+      for (const btn of saveButtons) {
+        const campaignId = btn.dataset.campaignId;
+        try {
+          const response = await fetch(`/api/investor/check-saved/${userInfo.userId}/${campaignId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await response.json();
+          if (data.success && data.isSaved) {
+            btn.classList.add('saved');
+            btn.querySelector('i').classList.remove('far');
+            btn.querySelector('i').classList.add('fas');
+          }
+        } catch (error) {
+          console.error('Error checking saved status:', error);
+        }
+      }
+    }
+
+    async function toggleSave(campaignId, button) {
+      if (!userInfo || !userInfo.userId) {
+        alert('Please login to save campaigns');
+        return;
+      }
+
+      const isSaved = button.classList.contains('saved');
+      const endpoint = isSaved ? '/api/investor/unsave-campaign' : '/api/investor/save-campaign';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            investorId: userInfo.userId,
+            campaignId
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          button.classList.toggle('saved');
+          const icon = button.querySelector('i');
+          if (button.classList.contains('saved')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+          } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+          }
+        }
+      } catch (error) {
+        console.error('Error toggling save:', error);
+      }
+    }
+
+    function searchCampaigns() {
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value;
+      const category = document.getElementById('categoryFilter').value;
+      const funding = document.getElementById('fundingFilter').value;
+      const stage = document.getElementById('stageFilter').value;
+
+      const params = {};
+      if (search) params.search = search;
+      if (category && category !== 'all') params.category = category;
+      if (stage) params.stage = stage;
+      
+      if (funding) {
+        const [min, max] = funding.split('-');
+        if (min) params.minFunding = min;
+        if (max) params.maxFunding = max;
+      }
+
+      loadCampaigns(params);
+    }
+
+    function viewCampaign(id) {
+      alert('Campaign details page coming soon! Campaign ID: ' + id);
+    }
+
+    // Search on Enter key
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchCampaigns();
+      }
+    });
+
+    // Load initial campaigns
+    loadCampaigns();
+  </script>
+</body>
+</html>

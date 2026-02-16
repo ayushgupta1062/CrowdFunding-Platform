@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Investor Dashboard - Crowdfunding Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+      overflow-x: hidden;
+    }
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 30px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 0 25px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+    .sidebar-brand h4 {
+      font-weight: 700;
+      margin: 0;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar-menu li {
+      margin: 5px 0;
+    }
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 15px 25px;
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+    .sidebar-menu i {
+      width: 25px;
+      margin-right: 12px;
+      font-size: 18px;
+    }
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 30px;
+    }
+    /* Welcome Banner */
+    .welcome-banner {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    }
+    .welcome-banner h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .welcome-banner p {
+      opacity: 0.95;
+      margin: 0;
+    }
+    /* Right Stats Sidebar */
+    .stats-sidebar {
+      width: 280px;
+      position: fixed;
+      right: 0;
+      top: 0;
+      height: 100vh;
+      background: white;
+      padding: 30px 20px;
+      border-left: 1px solid #e5e7eb;
+      overflow-y: auto;
+    }
+    .stat-card {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border-left: 4px solid #10b981;
+    }
+    .stat-card h6 {
+      color: #6b7280;
+      font-size: 13px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .stat-card .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1f2937;
+    }
+    /* Adjust main content for stats sidebar */
+    .main-content {
+      margin-right: 280px;
+    }
+    /* Category Buttons */
+    .category-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .category-btn {
+      padding: 10px 20px;
+      border: 2px solid #e5e7eb;
+      background: white;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+      color: #4b5563;
+    }
+    .category-btn:hover, .category-btn.active {
+      background: #10b981;
+      color: white;
+      border-color: #10b981;
+    }
+    /* Campaign Cards */
+    .campaign-card {
+      background: white;
+      border-radius: 12px;
+      padding: 0;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+    }
+    .campaign-card:hover {
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+    .campaign-image {
+      width: 100%;
+      height: 180px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 48px;
+      position: relative;
+    }
+    .campaign-body {
+      padding: 20px;
+    }
+    .save-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #6b7280;
+    }
+    .save-btn:hover {
+      background: white;
+      transform: scale(1.1);
+    }
+    .save-btn.saved {
+      color: #ef4444;
+    }
+    .campaign-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .campaign-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 5px;
+    }
+    .campaign-owner {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    .campaign-category {
+      display: inline-block;
+      padding: 5px 12px;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-radius: 15px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .campaign-tagline {
+      color: #4b5563;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    .progress-section {
+      margin-bottom: 15px;
+    }
+    .progress {
+      height: 8px;
+      border-radius: 10px;
+      background: #e5e7eb;
+    }
+    .progress-bar {
+      background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+      border-radius: 10px;
+    }
+    .funding-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+    .btn-view-details {
+      width: 100%;
+      padding: 10px;
+      background: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-view-details:hover {
+      background: #059669;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #1f2937;
+    }
+    .campaigns-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #9ca3af;
+    }
+    .empty-state i {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.5;
+    }
+    @media (max-width: 1400px) {
+      .stats-sidebar {
+        display: none;
+      }
+      .main-content {
+        margin-right: 0;
+      }
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
+      .sidebar-brand h4, .sidebar-menu span {
+        display: none;
+      }
+      .main-content {
+        margin-left: 70px;
+      }
+      .campaigns-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <h4><i class="fas fa-hand-holding-heart me-2"></i><span>CrowdFund</span></h4>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/investor/dashboard" class="active"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li><a href="/investor/explore"><i class="fas fa-compass"></i><span>Explore Campaigns</span></a></li>
+        <li><a href="/investor/saved"><i class="fas fa-bookmark"></i><span>Saved Projects</span></a></li>
+        <li><a href="/investor/messages"><i class="fas fa-comments"></i><span>Messages</span></a></li>
+        <li><a href="/investor/profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
+        <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <h2>Welcome back, <span id="userName">Investor</span> 👋</h2>
+        <p>Discover innovative startups to invest in.</p>
+      </div>
+
+      <!-- Explore Categories -->
+      <div class="mb-4">
+        <h5 class="section-title">Explore Categories</h5>
+        <div class="category-filters">
+          <button class="category-btn active" data-category="all">All</button>
+          <button class="category-btn" data-category="Technology">Technology</button>
+          <button class="category-btn" data-category="Education">Education</button>
+          <button class="category-btn" data-category="Finance">Finance</button>
+          <button class="category-btn" data-category="Healthcare">Healthcare</button>
+          <button class="category-btn" data-category="E-commerce">E-commerce</button>
+          <button class="category-btn" data-category="Other">Other</button>
+        </div>
+      </div>
+
+      <!-- Recommended Campaigns -->
+      <div>
+        <h5 class="section-title">Recommended Campaigns</h5>
+        <div class="campaigns-grid" id="campaignsContainer">
+          <!-- Campaign cards will be loaded here -->
+          <div class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading campaigns...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Stats Sidebar -->
+    <aside class="stats-sidebar">
+      <h6 class="mb-4" style="font-weight: 700; color: #1f2937;">Quick Stats</h6>
+      
+      <div class="stat-card">
+        <h6>Saved Campaigns</h6>
+        <div class="stat-value" id="savedCount">0</div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #f59e0b;">
+        <h6>Active Categories</h6>
+        <div class="stat-value" id="categoryCount">6</div>
+      </div>
+
+      <div class="stat-card" style="border-left-color: #3b82f6;">
+        <h6>Profile Completed</h6>
+        <div class="stat-value" id="profilePercent">85%</div>
+      </div>
+
+      <div class="mt-4">
+        <h6 class="mb-3" style="font-weight: 700; color: #1f2937; font-size: 14px;">Your Interests</h6>
+        <div id="interestsList" style="font-size: 13px; color: #6b7280;">
+          <p>Loading...</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    // Get user info from token
+    function parseJwt(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1]));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    const userInfo = parseJwt(token);
+    if (userInfo && userInfo.email) {
+      document.getElementById('userName').textContent = userInfo.email.split('@')[0];
+    }
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      localStorage.removeItem('registeredRole');
+      window.location.href = '/login';
+    });
+
+    // Get category icon
+    function getCategoryIcon(category) {
+      const icons = {
+        'Technology': 'fa-laptop-code',
+        'Education': 'fa-graduation-cap',
+        'Finance': 'fa-chart-line',
+        'Healthcare': 'fa-heartbeat',
+        'E-commerce': 'fa-shopping-cart',
+        'Other': 'fa-lightbulb'
+      };
+      return icons[category] || 'fa-lightbulb';
+    }
+
+    // Load campaigns
+    async function loadCampaigns(category = 'all') {
+      const container = document.getElementById('campaignsContainer');
+      container.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading campaigns...</p></div>';
+
+      try {
+        const response = await fetch('/api/campaigns', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (data.success && data.campaigns.length > 0) {
+          let campaigns = data.campaigns;
+          if (category !== 'all') {
+            campaigns = campaigns.filter(c => c.category === category);
+          }
+
+          if (campaigns.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No campaigns found in this category</p></div>';
+            return;
+          }
+
+          container.innerHTML = campaigns.slice(0, 6).map(campaign => {
+            const progress = (campaign.currentFunding / campaign.fundingGoal) * 100;
+            const icon = getCategoryIcon(campaign.category);
+            return `
+              <div class="campaign-card">
+                <div class="campaign-image">
+                  <i class="fas ${icon}"></i>
+                  <button class="save-btn" onclick="toggleSave('${campaign._id}', this)" data-campaign-id="${campaign._id}">
+                    <i class="far fa-bookmark"></i>
+                  </button>
+                </div>
+                <div class="campaign-body">
+                  <div class="campaign-header">
+                    <div>
+                      <div class="campaign-title">${campaign.projectName}</div>
+                      <div class="campaign-owner">by ${campaign.ownerName}</div>
+                    </div>
+                    <span class="campaign-category">${campaign.category}</span>
+                  </div>
+                  <p class="campaign-tagline">${campaign.tagline}</p>
+                  <div class="progress-section">
+                    <div class="progress">
+                      <div class="progress-bar" style="width: ${Math.min(progress, 100)}%"></div>
+                    </div>
+                    <div class="funding-info">
+                      <span><strong>$${campaign.currentFunding.toLocaleString()}</strong> raised</span>
+                      <span>Goal: $${campaign.fundingGoal.toLocaleString()}</span>
+                    </div>
+                  </div>
+                  <button class="btn-view-details" onclick="viewCampaign('${campaign._id}')">
+                    View Details
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          // Load saved status for each campaign
+          loadSavedStatus();
+        } else {
+          container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>No campaigns available yet</p></div>';
+        }
+      } catch (error) {
+        console.error('Error loading campaigns:', error);
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load campaigns</p></div>';
+      }
+    }
+
+    // Load saved status
+    async function loadSavedStatus() {
+      if (!userInfo || !userInfo.userId) return;
+      
+      const saveButtons = document.querySelectorAll('.save-btn');
+      for (const btn of saveButtons) {
+        const campaignId = btn.dataset.campaignId;
+        try {
+          const response = await fetch(`/api/investor/check-saved/${userInfo.userId}/${campaignId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await response.json();
+          if (data.success && data.isSaved) {
+            btn.classList.add('saved');
+            btn.querySelector('i').classList.remove('far');
+            btn.querySelector('i').classList.add('fas');
+          }
+        } catch (error) {
+          console.error('Error checking saved status:', error);
+        }
+      }
+    }
+
+    // Toggle save campaign
+    async function toggleSave(campaignId, button) {
+      if (!userInfo || !userInfo.userId) {
+        alert('Please login to save campaigns');
+        return;
+      }
+
+      const isSaved = button.classList.contains('saved');
+      const endpoint = isSaved ? '/api/investor/unsave-campaign' : '/api/investor/save-campaign';
+
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            investorId: userInfo.userId,
+            campaignId
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          button.classList.toggle('saved');
+          const icon = button.querySelector('i');
+          if (button.classList.contains('saved')) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+          } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+          }
+          // Update saved count
+          updateSavedCount();
+        }
+      } catch (error) {
+        console.error('Error toggling save:', error);
+      }
+    }
+
+    // Update saved count
+    async function updateSavedCount() {
+      if (!userInfo || !userInfo.userId) return;
+      
+      try {
+        const response = await fetch(`/api/investor/saved-campaigns/${userInfo.userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+          document.getElementById('savedCount').textContent = data.campaigns.length;
+        }
+      } catch (error) {
+        console.error('Error updating saved count:', error);
+      }
+    }
+
+    // Category filter
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadCampaigns(btn.dataset.category);
+      });
+    });
+
+    // View campaign details
+    function viewCampaign(id) {
+      alert('Campaign details page coming soon! Campaign ID: ' + id);
+    }
+
+    // Load investor profile
+    async function loadInvestorProfile() {
+      if (!userInfo || !userInfo.userId) return;
+      
+      try {
+        const response = await fetch(`/api/investor/profile/${userInfo.userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (data.success) {
+          const investor = data.investor;
+          
+          // Update interests
+          const interestsList = document.getElementById('interestsList');
+          if (investor.preferredCategories && investor.preferredCategories.length > 0) {
+            interestsList.innerHTML = investor.preferredCategories.map(cat => 
+              `<span style="display: inline-block; padding: 5px 12px; background: #e0f2fe; color: #0369a1; border-radius: 15px; font-size: 12px; margin: 3px;">${cat}</span>`
+            ).join('');
+          } else {
+            interestsList.innerHTML = '<p style="color: #9ca3af;">No preferences set</p>';
+          }
+
+          // Calculate profile completion
+          let completed = 0;
+          let total = 7;
+          if (investor.fullName) completed++;
+          if (investor.email) completed++;
+          if (investor.phone) completed++;
+          if (investor.investmentBudget) completed++;
+          if (investor.preferredCategories && investor.preferredCategories.length > 0) completed++;
+          if (investor.investorBio) completed++;
+          if (investor.profilePhoto) completed++;
+          
+          const percentage = Math.round((completed / total) * 100);
+          document.getElementById('profilePercent').textContent = percentage + '%';
+          
+          // Update category count
+          if (investor.preferredCategories) {
+            document.getElementById('categoryCount').textContent = investor.preferredCategories.length;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      }
+    }
+
+    // Load initial data
+    loadCampaigns();
+    loadInvestorProfile();
+    updateSavedCount();
+  </script>
+</body>
+</html>

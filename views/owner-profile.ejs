@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - Crowdfunding Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8f9fa;
+    }
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      padding: 30px 0;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 0 25px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      margin-bottom: 20px;
+    }
+    .sidebar-brand h4 {
+      font-weight: 700;
+      margin: 0;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar-menu li {
+      margin: 5px 0;
+    }
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      padding: 15px 25px;
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .sidebar-menu a:hover, .sidebar-menu a.active {
+      background: rgba(255,255,255,0.15);
+      color: white;
+    }
+    .sidebar-menu i {
+      width: 25px;
+      margin-right: 12px;
+      font-size: 18px;
+    }
+    .main-content {
+      flex: 1;
+      margin-left: 260px;
+      padding: 30px;
+      max-width: 1200px;
+    }
+    .page-header {
+      margin-bottom: 30px;
+    }
+    .page-header h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 10px;
+    }
+    .profile-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .profile-photo-section {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    .photo-preview {
+      position: relative;
+    }
+    .profile-photo {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #f59e0b;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 48px;
+      font-weight: 700;
+    }
+    .photo-upload-btn {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f59e0b;
+      border: 3px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .photo-upload-btn:hover {
+      background: #d97706;
+      transform: scale(1.1);
+    }
+    .photo-upload-btn i {
+      color: white;
+      font-size: 16px;
+    }
+    .photo-info h4 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 5px;
+    }
+    .photo-info p {
+      color: #6b7280;
+      margin-bottom: 15px;
+    }
+    .btn-change-photo {
+      padding: 10px 20px;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-change-photo:hover {
+      background: #d97706;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: #f59e0b;
+    }
+    .form-group input:read-only {
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .btn-save {
+      padding: 12px 30px;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-save:hover {
+      background: #d97706;
+    }
+    .btn-save:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .alert {
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .alert.show {
+      display: block;
+    }
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+    .alert-danger {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+      }
+      .sidebar-brand h4, .sidebar-menu span {
+        display: none;
+      }
+      .main-content {
+        margin-left: 70px;
+      }
+      .profile-photo-section {
+        flex-direction: column;
+        text-align: center;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <h4><i class="fas fa-rocket me-2"></i><span>CrowdFund</span></h4>
+      </div>
+      <ul class="sidebar-menu">
+        <li><a href="/owner/dashboard"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+        <li><a href="/owner/campaigns"><i class="fas fa-bullhorn"></i><span>My Campaigns</span></a></li>
+        <li><a href="/owner/create-campaign"><i class="fas fa-plus-circle"></i><span>Create Campaign</span></a></li>
+        <li><a href="/owner/messages"><i class="fas fa-comments"></i><span>Messages</span></a></li>
+        <li><a href="/owner/analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a></li>
+        <li><a href="/owner/profile" class="active"><i class="fas fa-user"></i><span>Profile</span></a></li>
+        <li><a href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <div class="page-header">
+        <h2><i class="fas fa-user-circle me-2"></i>My Profile</h2>
+        <p style="color: #6b7280;">Manage your personal information and startup details</p>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <!-- Personal Information -->
+      <div class="profile-section">
+        <h3 class="section-title"><i class="fas fa-user me-2"></i>Personal Information</h3>
+        
+        <div class="profile-photo-section">
+          <div class="photo-preview">
+            <div class="profile-photo" id="profilePhotoDisplay">
+              <i class="fas fa-user"></i>
+            </div>
+            <label for="photoInput" class="photo-upload-btn">
+              <i class="fas fa-camera"></i>
+            </label>
+            <input type="file" id="photoInput" accept="image/*" style="display: none;">
+          </div>
+          <div class="photo-info">
+            <h4 id="displayName">Loading...</h4>
+            <p id="displayEmail">email@example.com</p>
+            <button class="btn-change-photo" onclick="document.getElementById('photoInput').click()">
+              <i class="fas fa-camera me-2"></i>Change Photo
+            </button>
+          </div>
+        </div>
+
+        <form id="personalInfoForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="fullName" required>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="email" readonly>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" id="phone" required>
+            </div>
+            <div class="form-group">
+              <label>Startup Name *</label>
+              <input type="text" id="startupName" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Bio</label>
+            <textarea id="bio" rows="4" placeholder="Tell us about yourself and your startup..."></textarea>
+          </div>
+          <button type="submit" class="btn-save" id="savePersonalBtn">
+            <i class="fas fa-save me-2"></i>Save Changes
+          </button>
+        </form>
+      </div>
+
+      <!-- Social Links -->
+      <div class="profile-section">
+        <h3 class="section-title"><i class="fas fa-link me-2"></i>Social & Startup Links</h3>
+        
+        <form id="socialLinksForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>LinkedIn Profile</label>
+              <input type="url" id="linkedIn" placeholder="https://linkedin.com/in/yourprofile">
+            </div>
+            <div class="form-group">
+              <label>Portfolio Website</label>
+              <input type="url" id="portfolio" placeholder="https://yourportfolio.com">
+            </div>
+            <div class="form-group">
+              <label>GitHub Profile</label>
+              <input type="url" id="github" placeholder="https://github.com/yourusername">
+            </div>
+          </div>
+          <button type="submit" class="btn-save" id="saveSocialBtn">
+            <i class="fas fa-save me-2"></i>Save Links
+          </button>
+        </form>
+      </div>
+
+      <!-- Security Section -->
+      <div class="profile-section">
+        <h3 class="section-title"><i class="fas fa-lock me-2"></i>Security</h3>
+        
+        <form id="passwordForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Current Password *</label>
+              <input type="password" id="currentPassword" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>New Password *</label>
+              <input type="password" id="newPassword" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password *</label>
+              <input type="password" id="confirmPassword" required minlength="6">
+            </div>
+          </div>
+          <button type="submit" class="btn-save" id="savePasswordBtn">
+            <i class="fas fa-key me-2"></i>Change Password
+          </button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    }
+
+    function parseJwt(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1]));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    const userInfo = parseJwt(token);
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    });
+
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      alertContainer.innerHTML = `
+        <div class="alert alert-${type} show">
+          <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+          ${message}
+        </div>
+      `;
+      setTimeout(() => {
+        alertContainer.innerHTML = '';
+      }, 5000);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Load profile
+    async function loadProfile() {
+      if (!userInfo || !userInfo.userId) return;
+
+      try {
+        const response = await fetch(`/api/owner/profile/${userInfo.userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          const owner = data.owner;
+          
+          document.getElementById('displayName').textContent = owner.fullName;
+          document.getElementById('displayEmail').textContent = owner.email;
+          
+          document.getElementById('fullName').value = owner.fullName || '';
+          document.getElementById('email').value = owner.email || '';
+          document.getElementById('phone').value = owner.phone || '';
+          document.getElementById('startupName').value = owner.startupName || '';
+          document.getElementById('bio').value = owner.bio || '';
+          document.getElementById('linkedIn').value = owner.linkedIn || '';
+          document.getElementById('portfolio').value = owner.portfolio || '';
+          document.getElementById('github').value = owner.github || '';
+          
+          if (owner.profilePhoto) {
+            const photoDisplay = document.getElementById('profilePhotoDisplay');
+            photoDisplay.innerHTML = `<img src="${owner.profilePhoto}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+          } else {
+            const initials = owner.fullName ? owner.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'U';
+            document.getElementById('profilePhotoDisplay').innerHTML = initials;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        showAlert('Failed to load profile', 'danger');
+      }
+    }
+
+    // Photo upload (Base64)
+    document.getElementById('photoInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        showAlert('Image size must be less than 5MB', 'danger');
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        showAlert('Please select a valid image file', 'danger');
+        return;
+      }
+
+      // Convert to Base64
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const imageData = event.target.result;
+
+        try {
+          const response = await fetch(`/api/owner/upload-photo/${userInfo.userId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ imageData })
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            showAlert('Profile photo updated successfully!', 'success');
+            const photoDisplay = document.getElementById('profilePhotoDisplay');
+            photoDisplay.innerHTML = `<img src="${imageData}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+          } else {
+            showAlert(data.message, 'danger');
+          }
+        } catch (error) {
+          console.error('Error uploading photo:', error);
+          showAlert('Failed to upload photo', 'danger');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Personal info form
+    document.getElementById('personalInfoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('savePersonalBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+
+      try {
+        const response = await fetch(`/api/owner/profile/${userInfo.userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            fullName: document.getElementById('fullName').value,
+            phone: document.getElementById('phone').value,
+            startupName: document.getElementById('startupName').value,
+            bio: document.getElementById('bio').value
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Personal information updated successfully!', 'success');
+          document.getElementById('displayName').textContent = data.owner.fullName;
+        } else {
+          showAlert(data.message, 'danger');
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        showAlert('Failed to update profile', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+      }
+    });
+
+    // Social links form
+    document.getElementById('socialLinksForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('saveSocialBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+
+      try {
+        const response = await fetch(`/api/owner/profile/${userInfo.userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            linkedIn: document.getElementById('linkedIn').value,
+            portfolio: document.getElementById('portfolio').value,
+            github: document.getElementById('github').value
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Social links updated successfully!', 'success');
+        } else {
+          showAlert(data.message, 'danger');
+        }
+      } catch (error) {
+        console.error('Error updating links:', error);
+        showAlert('Failed to update links', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save me-2"></i>Save Links';
+      }
+    });
+
+    // Password form
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('savePasswordBtn');
+      
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (newPassword !== confirmPassword) {
+        showAlert('New passwords do not match', 'danger');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Changing...';
+
+      try {
+        const response = await fetch(`/api/owner/password/${userInfo.userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            currentPassword: document.getElementById('currentPassword').value,
+            newPassword: newPassword
+          })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          showAlert('Password changed successfully!', 'success');
+          document.getElementById('passwordForm').reset();
+        } else {
+          showAlert(data.message, 'danger');
+        }
+      } catch (error) {
+        console.error('Error changing password:', error);
+        showAlert('Failed to change password', 'danger');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key me-2"></i>Change Password';
+      }
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>
